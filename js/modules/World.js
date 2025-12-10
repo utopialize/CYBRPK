@@ -15,6 +15,12 @@ export class World {
         this.generateWorld();
     }
 
+    getZoneIdByCoords(x, y) {
+        // Find zone with matching coordinates
+        const zone = this.zones.find(z => z.x === x && z.y === y);
+        return zone ? zone.id : null;
+    }
+
     generateWorld() {
         const grid = new Map();
         const numRooms = 15;
@@ -79,35 +85,18 @@ export class World {
             }
         }
 
-        // Ensure at least one enemy exists for combat quests
-        const enemy = this.pnjs.find(npc => npc.type === 'ennemi');
-        if (enemy) {
-            const hasEnemy = this.zones.some(z => z.pnj_presents.includes(enemy.id));
-            if (!hasEnemy) {
-                // Place enemy in a random non-start zone
-                const nonStartZones = this.zones.filter(z => z.id !== this.currentLocationId);
-                if (nonStartZones.length > 0) {
-                    const targetZone = this.rng.pick(nonStartZones);
-                    targetZone.pnj_presents.push(enemy.id);
-                }
-            }
-        }
-
-        // Ensure quest items exist
-        const questItem = this.itemsData.find(item => item.id === 'DATAPAD_KEY');
-        if (questItem) {
-            const hasQuestItem = this.zones.some(z => z.items_statiques.includes(questItem.id));
-            if (!hasQuestItem) {
-                // Place in a zone near start but not in start
-                const nearbyZones = this.zones.filter(z => 
-                    z.id !== this.currentLocationId && 
-                    (Math.abs(z.x) <= 2 && Math.abs(z.y) <= 2)
-                );
-                if (nearbyZones.length > 0) {
-                    const targetZone = this.rng.pick(nearbyZones);
-                    targetZone.items_statiques.push(questItem.id);
-                }
-            }
+        // Ensure Corrupted Drone exists (Unique Quest Enemy)
+        const corruptedDrone = this.pnjs.find(npc => npc.id === 'DROIDE_CORROMPU');
+        if (corruptedDrone) {
+             const hasDrone = this.zones.some(z => z.pnj_presents.includes(corruptedDrone.id));
+             if (!hasDrone) {
+                 // Place drone in a random non-start zone
+                 const nonStartZones = this.zones.filter(z => z.id !== this.currentLocationId);
+                 if (nonStartZones.length > 0) {
+                     const targetZone = this.rng.pick(nonStartZones);
+                     targetZone.pnj_presents.push(corruptedDrone.id);
+                 }
+             }
         }
 
         // Ensure at least some weapons and armor are available
@@ -167,10 +156,10 @@ export class World {
             }
         }
         
-        if (this.rng.next() > 0.5) {
+        if (!isStart && this.rng.next() > 0.5) {
              const item = this.rng.pick(this.itemsData);
-             // Don't place quest-critical items randomly
-             if (item.type !== 'key' && item.id !== 'DATAPAD_KEY') {
+             // Don't place quest-critical items or scenery randomly
+             if (item.type !== 'key' && item.id !== 'DATAPAD_KEY' && item.type !== 'scenery') {
                  newZone.items_statiques.push(item.id);
              }
         }

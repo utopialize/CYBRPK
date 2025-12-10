@@ -38,7 +38,7 @@
                 <h3>RACCOURCIS CLAVIER</h3>
                 <p><span class="cmd">↑/↓</span> - Naviguer dans l'historique</p>
                 <p><span class="cmd">TAB</span> - Autocomplétion</p>
-                <p><span class="cmd">Clic sur INV</span> - Voir l'inventaire (onglet HUD)</p>
+                <p>Inventaire visible en permanence à droite.</p>
 
                 <h3>OBJECTIF</h3>
                 <p>Parlez à Gibson dans la zone de départ pour commencer votre aventure.</p>
@@ -54,68 +54,129 @@
         </div>
     </div>
 
-    <div id="terminal-container" style="display:none;">
-        <div id="interface-layout">
-            <pre id="game-log"></pre> 
-            <div id="hud-panel">
-                <div class="hud-box">
-                    <div class="hud-title">NAV_SYSTEM</div>
-                    <canvas id="minimap-canvas" width="200" height="200"></canvas>
+    <!-- Main Game Container -->
+    <div class="game-container" id="terminal-container" style="display:none;">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">CYBRPK</div>
+            <div class="location">
+                <div class="location-label">Link: Ghost Channel</div>
+                <div class="location-text">SECTEUR: <span id="header-location">NEO-CITY</span> <span id="header-coords">[0,0]</span></div>
+            </div>
+            <div class="credits">
+                <span id="header-credits">0</span> CR
+            </div>
+        </header>
+
+        <!-- Terminal Section -->
+        <main class="terminal">
+            <div class="terminal-header">
+                <div class="terminal-status">
+                    <div class="status-dot"></div>
+                    <span class="terminal-title">CONNEXION ACTIVE</span>
                 </div>
-                <div class="hud-box">
-                    <div class="hud-title">STATUS</div>
-                    <div id="hud-status-content">
-                        <img id="hud-avatar" src="img/face_healthy.png" alt="Status">
-                        <div id="hud-bars">
-                            <div id="hud-hp-text">PV: 100/100</div>
-                            <div class="bar-container"><div id="hud-hp-bar" class="bar-fill"></div></div>
+                <span class="terminal-coords">[SEC_01]</span>
+            </div>
+            
+            <div class="output" id="game-log">
+                <!-- Log entries will be inserted here -->
+            </div>
+
+            <div class="suggestions" id="suggestions-bar" style="display:none;"></div>
+
+            <div class="input-area">
+                <span class="prompt" id="prompt">▶</span>
+                <div class="input-wrapper" id="input-wrapper">
+                    <span id="input-mirror"></span>
+                    <input type="text" class="input" id="command-input" autofocus autocomplete="off" spellcheck="false">
+                    <div class="cursor" id="custom-cursor"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- HUD Section -->
+        <aside class="hud" id="hud-panel">
+            <!-- Navigation -->
+            <!-- Navigation -->
+            <div class="hud-section minimap-container">
+                <div class="section-title">NAVIGATION</div>
+                <div id="minimap-controls" style="margin-bottom: 5px; display: flex; gap: 5px;">
+                    <button id="pan-mode-btn" class="nav-btn">⛶ PANORAMIQUE</button>
+                    <button id="reset-mode-btn" class="nav-btn" style="display:none; color: var(--accent);">⊙ RETOUR AGENT</button>
+                </div>
+                <div class="minimap">
+                    <div class="minimap-grid"></div>
+                    <canvas id="minimap-canvas" width="200" height="200" style="width: 100%; height: 100%; object-fit: contain;"></canvas>
+                    <div class="minimap-vignette"></div>
+                </div>
+            </div>
+
+            <!-- Status -->
+            <div class="hud-section status-section">
+                <div class="section-title">STATUS AGENT</div>
+                <div class="portrait-container">
+                    <div class="portrait-frame">
+                        <div class="portrait-corner-bl"></div>
+                        <div class="portrait-corner-br"></div>
+                        <div class="portrait">
+                            <!-- Could be dynamically changed based on HP -->
+                            <img id="hud-avatar" src="img/face_healthy.png" alt="Status" style="width: 100%; height: 100%; object-fit: cover;">
+                            <span class="portrait-label">RUNNER</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Tabbed Info Panel -->
-                <div class="hud-box" id="info-panel">
-                    <div class="hud-tabs">
-                        <div class="hud-tab active" id="tab-stats">STATS</div>
-                        <div class="hud-tab" id="tab-inventory">INV</div>
+                <div class="hp-container">
+                    <div class="hp-header">
+                        <span class="hp-label">INTÉGRITÉ SYSTÈME</span>
+                        <div class="hp-value" id="hud-hp-text">100<span>%</span></div>
+                    </div>
+                    <div class="hp-bar-outer">
+                        <div class="hp-bar-glow"></div>
+                        <div class="hp-bar-inner" id="hud-hp-bar"></div>
+                    </div>
+                </div>
+
+                <div class="stats-grid" id="hud-stats-content">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Equipment & Inventory Tabs -->
+            <div class="hud-section info-section" id="info-panel">
+                 <div class="hud-tabs">
+                    <div class="hud-tab active" id="tab-inventory">EQUIPEMENT</div>
+                    <!-- Stats tab is merged into Status section now, or we can keep it for separate detailed stats -->
+                </div>
+
+                <div id="view-inventory" class="hud-view active">
+                    <div class="equipment-list" id="equipment-slots">
+                        <!-- Populated by JS -->
                     </div>
                     
-                    <!-- Stats View -->
-                    <div id="view-stats" class="hud-view active">
-                        <div id="hud-stats-content">
-                            <!-- Populated by JS -->
-                        </div>
+                    <div class="section-title" style="margin-top: 15px;">INVENTAIRE</div>
+                    <div class="inventory-list" id="inventory-items">
+                         <!-- Populated by JS -->
                     </div>
-                    
-                    <!-- Inventory View -->
-                    <div id="view-inventory" class="hud-view">
-                        <div id="hud-equipment-content">
-                            <div class="inv-section">
-                                <div class="inv-section-title">ÉQUIPEMENT</div>
-                                <div id="equipment-slots">
-                                    <!-- Populated by JS -->
-                                </div>
-                            </div>
-                            <div class="inv-section">
-                                <div class="inv-section-title">SAC</div>
-                                <div id="inventory-items">
-                                    <!-- Populated by JS -->
-                                </div>
-                            </div>
-                        </div>
+                </div>
+                </div>
+
+
+            <!-- Audio Player (Bottom) -->
+            <div class="hud-section audio-section">
+                <div class="section-title">LIEN NEURONAL AUDIO <span id="audio-visualizer" class="visualizer"></span></div>
+                <div class="player-controls">
+                    <div class="track-info">
+                        <span id="track-name">READY</span>
+                    </div>
+                    <div class="controls-row">
+                        <button id="btn-play" class="neon-btn">▶</button>
+                        <button id="btn-next" class="neon-btn">⏭</button>
+                        <input type="range" id="vol-slider" min="0" max="100" value="30" class="neon-slider">
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <div id="input-line">
-            <span id="prompt">[NEO-CITY] ></span>
-            <div id="input-wrapper">
-                <span id="input-mirror"></span>
-                <input type="text" id="command-input" autofocus>
-                <span id="custom-cursor">█</span>
-            </div>
-        </div>
+        </aside>
     </div>
 
     <div id="canvas-container" style="display:none; text-align: center;">

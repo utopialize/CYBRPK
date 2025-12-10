@@ -29,6 +29,10 @@ export class Player {
         if (this.hp < 0) this.hp = 0;
     }
 
+    isDead() {
+        return this.hp <= 0;
+    }
+
     heal(amount) {
         this.hp += amount;
         if (this.hp > this.maxHp) this.hp = this.maxHp;
@@ -97,6 +101,9 @@ export class Player {
             return { success: false, message: `Cet objet ne peut pas être équipé (${item.type}).` };
         }
 
+        // Calculate stat changes
+        const oldStats = this.stats;
+        
         // If something is already equipped, unequip it first
         if (this.equipment[slot]) {
             this.unequip(slot);
@@ -106,7 +113,21 @@ export class Player {
         this.removeItem(item.id);
         this.equipment[slot] = item;
         
-        return { success: true, message: `Vous avez équipé : ${item.nom}.` };
+        // Calculate new stats
+        const newStats = this.stats;
+        const statChanges = {
+            strength: newStats.strength - oldStats.strength,
+            agility: newStats.agility - oldStats.agility,
+            hacking: newStats.hacking - oldStats.hacking,
+            armor: newStats.armor - oldStats.armor
+        };
+        
+        return { 
+            success: true, 
+            message: `Vous avez équipé : ${item.nom}.`,
+            item: item,
+            statChanges: statChanges
+        };
     }
 
     unequip(slot) {

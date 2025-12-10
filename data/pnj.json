@@ -13,7 +13,15 @@
     "type": "ennemi",
     "dialogue_initial": "ALERT. TRESPASS DETECTED.",
     "statistiques": {"force": 12, "armure": 5, "agilite": 3},
-    "credits_loot": "50-150",
     "item_loot": ["MODULE_DE_REPARATION"]
+  },
+  {
+    "id": "DROIDE_CORROMPU",
+    "nom": "Drone Corrompu (Élite)",
+    "type": "ennemi",
+    "dialogue_initial": "ERROR... DATA... MINE...",
+    "statistiques": {"force": 15, "armure": 8, "agilite": 5},
+    "credits_loot": "100-200",
+    "item_loot": []
   }
 ]

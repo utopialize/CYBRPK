@@ -41,6 +41,12 @@
     "description": "Clé cryptée."
   },
   {
+    "id": "DATAPAD_BROKEN",
+    "nom": "Clé Datapad (Endommagée)",
+    "type": "key",
+    "description": "Le datapad est en piteux état suite au combat. Les données sont peut-être corrompues."
+  },
+  {
     "id": "DEBRIS_DRONE",
     "nom": "Épave de Drone",
     "description": "Un tas de ferraille fumant et d'étincelles. Inutile maintenant.",

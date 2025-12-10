@@ -56,31 +56,23 @@ export class Combat {
         const weaponName = weapon ? weapon.nom : "Mains nues";
 
         // PHASE 1: INTRODUCTION
-        this.ui.log(`\n**[COMBAT ENGAGÉ]**`);
-        await this.ui.sleep(300);
-        this.ui.log(`Cible : ${targetDetails.nom}`);
-        await this.ui.sleep(300);
-        this.ui.log(`PV Ennemi : ${this.world.npcHealth[targetId]}`);
-        await this.ui.sleep(500);
+        // PHASE 1: INTRODUCTION
+        this.ui.log(`\n**[ENGAGEMENT]** Cible: ${targetDetails.nom} | PV: ${this.world.npcHealth[targetId]}`);
+        await this.ui.sleep(100);
 
         // PHASE 2: PREPARATION
         this.ui.log(`\n> Vous brandissez : ${weaponName}`);
         await this.ui.sleep(400);
         
         // PHASE 3: ATTACK ROLL
-        this.ui.log(`\n[CALCUL D'ATTAQUE]`);
-        await this.ui.sleep(300);
-        
+        // PHASE 3: ATTACK ROLL
+        // Combined Calculation Log
         const roll = this.rollDice(20);
-        this.ui.log(`Jet de dé : ${roll}/20`);
-        await this.ui.sleep(400);
-        
         const attackValue = stats.strength + roll;
         const defenseValue = targetDetails.statistiques.armure * 2;
-        this.ui.log(`Force totale : ${attackValue} (${stats.strength} + ${roll})`);
-        await this.ui.sleep(300);
-        this.ui.log(`Défense ennemie : ${defenseValue}`);
-        await this.ui.sleep(500);
+        
+        this.ui.log(`[FRAPPE] ${roll}/20 + Force(${stats.strength}) = ${attackValue} (vs DEF ${defenseValue})`);
+        await this.ui.sleep(200);
 
         let damage = 0;
 
@@ -102,21 +94,15 @@ export class Combat {
             
         } else if (attackValue >= defenseValue) {
             // HIT
-            this.ui.log(`\n[IMPACT]`);
-            await this.ui.sleep(300);
-            
             const margin = attackValue - defenseValue;
             damage = weaponDamage + Math.floor(margin / 2);
-            
-            this.ui.log(`Coup réussi !`);
-            await this.ui.sleep(300);
+            this.ui.log(`>> [IMPACT] Coup réussi. Dégâts calculés : ${damage}`);
+            await this.ui.sleep(200);
             
         } else {
             // MISS
-            this.ui.log(`\n[ÉCHEC]`);
+            this.ui.log(`>> [ÉCHEC] Cible manquée.`);
             await this.ui.sleep(300);
-            this.ui.log(`${targetDetails.nom} esquive votre attaque !`);
-            await this.ui.sleep(500);
             damage = 0;
         }
 
@@ -158,6 +144,13 @@ export class Combat {
             // Add wreckage if robot/drone
             if (targetDetails.nom.toUpperCase().includes('DRONE') || targetDetails.nom.toUpperCase().includes('DROIDE')) {
                 this.world.addItemToZone(zone.id, 'DEBRIS_DRONE');
+                
+                // Specific loot for Corrupted Drone
+                if (targetId === 'DROIDE_CORROMPU') {
+                     this.world.addItemToZone(zone.id, 'DATAPAD_BROKEN');
+                     this.ui.log(`Le drone lâche un datapad en s'écrasant. Il semble endommagé.`);
+                }
+                
                 this.ui.log(`Les débris du drone gisent au sol.`);
             }
             
@@ -189,30 +182,21 @@ export class Combat {
         const damageTaken = Math.max(0, incomingDamage - stats.armor);
         
         if (damageTaken > 0) {
-            this.ui.log(`\n[IMPACT SUR VOUS]`);
-            await this.ui.sleep(300);
-            
-            // SCREEN SHAKE + GLITCH on player damage
             this.ui.triggerDamageEffect();
-            
             this.player.takeDamage(damageTaken);
-            this.ui.log(`**DÉGÂTS SUBIS : -${damageTaken} PV**`);
+            this.ui.log(`[ALERTE] -${damageTaken} PV (Armure: -${stats.armor}) | Intégrité: ${this.player.hp}/${this.player.maxHp}`);
             await this.ui.sleep(300);
-            this.ui.log(`(Armure a bloqué ${stats.armor} dégâts)`);
-            await this.ui.sleep(400);
-            this.ui.log(`Vos PV : ${this.player.hp}/${this.player.maxHp}`);
-            await this.ui.sleep(500);
             
             if (this.player.hp <= 0) {
                 this.ui.log(`\n**╔═══════════════════╗**`);
                 await this.ui.sleep(200);
-                this.ui.log(`**║   GAME OVER      ║**`);
+                this.ui.log(`**║ SIGNAL NEURONAL PERDU ║**`);
                 await this.ui.sleep(200);
                 this.ui.log(`**╚═══════════════════╝**`);
                 await this.ui.sleep(300);
-                this.ui.log(`\nVous avez été neutralisé...`);
+                this.ui.log(`\n**[AGENT NEUTRALISÉ]** INTERRUPTION DU LIEN...`);
                 await this.ui.sleep(300);
-                this.ui.log(`Tapez QUIT pour retourner au menu.`);
+                this.ui.log(`Tapez QUIT pour réinitialiser le système.`);
             }
         } else {
             this.ui.log(`\n[PROTECTION]`);

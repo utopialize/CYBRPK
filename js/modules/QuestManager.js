@@ -70,22 +70,39 @@ export class QuestManager {
         const quest = this.getQuest(questId);
         this.ui.log(`\n**[QUÊTE TERMINÉE]** ${quest.titre}`);
         
-        // Remove quest items from inventory (like DATAPAD_KEY)
-        quest.etapes.forEach(step => {
-            if (step.type === 'obtain' && step.cible) {
-                // Remove the quest item
-                const index = this.player.inventory.indexOf(step.cible);
-                if (index !== -1) {
-                    this.player.inventory.splice(index, 1);
-                    this.ui.log(`[${step.cible} retiré de l'inventaire]`);
+        let rewardModifier = 1.0;
+
+        // Custom Logic for Quest 1 (Datapad)
+        if (questId === 'QUEST_01_FIRST_RUN') {
+             if (this.player.inventory.includes('DATAPAD_BROKEN')) {
+                 rewardModifier = 0.5;
+                 this.ui.log(`Gibson examine le datapad en miettes. "Bon sang, c'est inutilisable... Je te paie la moitié pour l'effort."`);
+                 // Remove broken
+                 const idx = this.player.inventory.indexOf('DATAPAD_BROKEN');
+                 if (idx !== -1) this.player.inventory.splice(idx, 1);
+             } else if (this.player.inventory.includes('DATAPAD_KEY')) {
+                 // Remove intact
+                 const idx = this.player.inventory.indexOf('DATAPAD_KEY');
+                 if (idx !== -1) this.player.inventory.splice(idx, 1);
+             }
+        } else {
+            // Generic Item Removal
+            quest.etapes.forEach(step => {
+                if (step.type === 'obtain' && step.cible) {
+                    const index = this.player.inventory.indexOf(step.cible);
+                    if (index !== -1) {
+                        this.player.inventory.splice(index, 1);
+                        this.ui.log(`[${step.cible} retiré de l'inventaire]`);
+                    }
                 }
-            }
-        });
+            });
+        }
         
         // Give rewards
         if (quest.recompenses.credits > 0) {
-            this.player.addCredits(quest.recompenses.credits);
-            this.ui.log(`Récompense : ${quest.recompenses.credits} crédits`);
+            const amount = Math.floor(quest.recompenses.credits * rewardModifier);
+            this.player.addCredits(amount);
+            this.ui.log(`Récompense : ${amount} crédits`);
         }
         
         if (quest.recompenses.items && quest.recompenses.items.length > 0) {
@@ -149,9 +166,19 @@ export class QuestManager {
             const quest = this.getQuest(activeQuest.questId);
             const step = quest.etapes[activeQuest.currentStep];
             
-            if (step.type === eventType && step.cible === target) {
-                this.ui.log(`\n**[OBJECTIF ACCOMPLI]** ${step.description}`);
-                this.advanceQuest(activeQuest.questId);
+            if (step.type === eventType) {
+                 let match = false;
+                 if (step.cible === target) match = true;
+                 
+                 // Special check for Datapad quest (accept broken version)
+                 if (quest.id === 'QUEST_01_FIRST_RUN' && step.cible === 'DATAPAD_KEY' && target === 'DATAPAD_BROKEN') {
+                     match = true;
+                 }
+
+                 if (match) {
+                     this.ui.log(`\n**[OBJECTIF ACCOMPLI]** ${step.description}`);
+                     this.advanceQuest(activeQuest.questId);
+                 }
             }
         }
     }

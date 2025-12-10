@@ -4,6 +4,7 @@ import { World } from './World.js';
 import { Combat } from './Combat.js';
 import { Hacking } from './Hacking.js';
 import { QuestManager } from './QuestManager.js';
+import { AudioPlayer } from './AudioPlayer.js';
 import { DataLoader } from '../utils/DataLoader.js';
 import { SaveManager } from '../utils/SaveManager.js';
 
@@ -15,13 +16,21 @@ export class Game {
         this.combat = null;
         this.hacking = null;
         this.questManager = null;
+        this.audioPlayer = null;
         this.currentScreen = 'BOOT'; // BOOT, TITLE, GAME
     }
 
     async init() {
+        // Init Audio Player early
+        this.audioPlayer = new AudioPlayer();
+
         // Show boot sequence first
         await this.ui.showBootSequence();
         
+        // Auto-play audio on interaction
+        this.audioPlayer.loadTrack(0); // Preload
+        this.audioPlayer.togglePlay(); // Start playing (user just clicked)
+
         // Then show title screen
         this.showTitleScreen();
     }
@@ -72,7 +81,18 @@ export class Game {
             
             this.questManager = new QuestManager(data.quests, this.player, this.world, this.ui);
             this.combat = new Combat(this.world, this.player, this.ui, this.questManager);
-            this.hacking = new Hacking(this.ui, this.player);
+            this.hacking = new Hacking(this.ui, this.player, this.world, this.combat);
+            
+            // Audio Init - Bind UI (Player already active)
+            if (this.audioPlayer) {
+                this.audioPlayer.bindUI({
+                    playBtn: document.getElementById('btn-play'),
+                    nextBtn: document.getElementById('btn-next'),
+                    volSlider: document.getElementById('vol-slider'),
+                    trackName: document.getElementById('track-name'),
+                    visualizer: document.getElementById('audio-visualizer')
+                });
+            }
 
             this.ui.log("Connexion établie.");
             this.handleLook();
@@ -145,7 +165,8 @@ export class Game {
         // Add to history
         this.ui.addToHistory(input);
         
-        this.ui.log(`> ${input}`);
+        // Echo user input safely (escaped)
+        this.ui.log(this.ui.escapeHTML(`> ${input}`), { allowHTML: false });
         
         const parts = input.toUpperCase().split(/\s+/).filter(p => p.length > 0);
         const command = parts[0];
@@ -155,6 +176,12 @@ export class Game {
     }
 
     resolveAction(command, args) {
+        // [GAMEOVER LOCK]
+        if (this.player.isDead() && command !== 'QUIT') {
+            this.ui.logSystem("ERREUR CRITIQUE : LIEN ROMPU. LE SYSTÈME NE RÉPOND PLUS, Opérateur.");
+            return;
+        }
+
         switch (command) {
             case 'MOVE':
             case 'GO':
@@ -199,11 +226,16 @@ export class Game {
             case 'QUIT':
                 this.handleQuit();
                 break;
+            case 'JUMP':
+                const x = parseInt(args[0]);
+                const y = parseInt(args[1]);
+                this.handleJump(x, y);
+                break;
             case 'HELP':
-                this.ui.log("Commandes: MOVE, LOOK, TAKE, EQUIP, UNEQUIP, ATTACK, HACK, TALK, QUESTS, SAVE, QUIT");
+                this.ui.logSystem("Commandes disponibles, Opérateur: MOVE, LOOK, TAKE, EQUIP, UNEQUIP, ATTACK, HACK, TALK, QUESTS, JUMP, SAVE, QUIT");
                 break;
             default:
-                this.ui.log("COMMANDE INCONNUE. Taper HELP.");
+                this.ui.logSystem("COMMANDE INCONNUE, Opérateur. Tapez HELP pour la liste des commandes.");
         }
     }
 
@@ -211,7 +243,7 @@ export class Game {
         const result = this.world.move(direction);
         if (result.success) {
             this.ui.updatePrompt(result.newId);
-            this.ui.log(`Vous vous dirigez vers le ${direction}...`);
+            this.ui.log(`\n**[PROTOCOLE D'ORIENTATION]** Activation du déplacement ${direction}...`);
             this.handleLook();
             this.ui.updateMinimap(this.world);
             this.updateAutocompleteContext();
@@ -227,28 +259,71 @@ export class Game {
             return;
         }
 
-        this.ui.log(`\n<b>VOUS ÊTES DANS : ${zone.nom}</b>`);
+        // 1. Zone Header
+        const headerHTML = `
+            <div class="zone-header">
+                <div class="zone-icon">📍</div>
+                <div class="zone-title">${zone.nom}</div>
+                <div class="zone-sector">SECTEUR [${zone.x},${zone.y}]</div>
+            </div>
+        `;
+        this.ui.log(headerHTML);
         
-        // Use typing effect for description
-        await this.ui.logTyped(zone.description, 15);
+        // Update header coordinates
+        if (this.ui.headerCoords) {
+            this.ui.headerCoords.textContent = `[${zone.x},${zone.y}]`;
+        }
+        
+        // 2. Description (Typed)
+        await this.ui.logTyped(zone.description, 10, 'description');
 
-        const exits = Object.keys(zone.connexions).join(', ');
-        this.ui.log(`**SORTIES :** ${exits.length > 0 ? exits : 'Aucune.'}`);
-
-        if (zone.pnj_presents && zone.pnj_presents.length > 0) {
-            const pnjNames = zone.pnj_presents.map(id => {
-                const p = this.world.getNPC(id);
-                return p ? p.nom : id;
-            }).join(', ');
-            this.ui.log(`**ENTITÉS :** ${pnjNames}`);
+        // 3. Exits
+        const exits = Object.keys(zone.connexions);
+        if (exits.length > 0) {
+            const exitSpans = exits.map(dir => `<span>${dir}</span>`).join('');
+            const exitsHTML = `
+                <div class="info-block exits">
+                    <div class="info-label">SORTIES DISPONIBLES</div>
+                    <div>${exitSpans}</div>
+                </div>
+            `;
+            this.ui.log(exitsHTML);
+        } else {
+             this.ui.log(`<div class="info-block"><div class="info-label">SORTIES</div><span class="text-dim">Aucune issue.</span></div>`);
         }
 
+        // 4. Entities
+        if (zone.pnj_presents && zone.pnj_presents.length > 0) {
+            const pnjSpans = zone.pnj_presents.map(id => {
+                const p = this.world.getNPC(id);
+                const name = p ? p.nom : id;
+                return `<span>⚠️ ${name}</span>`;
+            }).join(' ');
+            
+            const pnjHTML = `
+                <div class="info-block entities">
+                    <div class="info-label">ENTITÉS DÉTECTÉES</div>
+                    <div>${pnjSpans}</div>
+                </div>
+            `;
+            this.ui.log(pnjHTML);
+        }
+
+        // 5. Items
         if (zone.items_statiques && zone.items_statiques.length > 0) {
-             const itemNames = zone.items_statiques.map(id => {
+             const itemSpans = zone.items_statiques.map(id => {
                 const i = this.world.getItem(id);
-                return i ? i.nom : id;
-            }).join(', ');
-            this.ui.log(`**OBJETS VISIBLES :** ${itemNames}`);
+                const name = i ? i.nom : id;
+                return `<span>📦 ${name}</span>`;
+            }).join(' ');
+
+            const itemsHTML = `
+                <div class="info-block objects">
+                    <div class="info-label">OBJETS AU SOL</div>
+                    <div>${itemSpans}</div>
+                </div>
+            `;
+            this.ui.log(itemsHTML);
         }
         
         this.updateAutocompleteContext();
@@ -283,6 +358,12 @@ export class Game {
         }
 
         const item = this.world.getItem(targetId);
+
+        if (item.type === 'scenery') {
+            this.ui.log("Impossible de ramasser cet objet.");
+            return;
+        }
+
         if (item.type === 'currency') {
              const amount = item.id === 'CREDITS_20' ? 20 : 10; 
              this.player.addCredits(amount);
@@ -318,7 +399,31 @@ export class Game {
 
         const item = this.world.getItem(itemId);
         const result = this.player.equip(item);
-        this.ui.log(result.message);
+        
+        if (result.success) {
+            this.ui.log(`\n**[ÉQUIPEMENT]** ${result.message}`);
+            
+            // Display stat changes
+            if (result.statChanges) {
+                const changes = [];
+                if (result.statChanges.strength !== 0) changes.push(`Force: ${result.statChanges.strength > 0 ? '+' : ''}${result.statChanges.strength}`);
+                if (result.statChanges.agility !== 0) changes.push(`Agilité: ${result.statChanges.agility > 0 ? '+' : ''}${result.statChanges.agility}`);
+                if (result.statChanges.hacking !== 0) changes.push(`Hack: ${result.statChanges.hacking > 0 ? '+' : ''}${result.statChanges.hacking}`);
+                if (result.statChanges.armor !== 0) changes.push(`Armure: ${result.statChanges.armor > 0 ? '+' : ''}${result.statChanges.armor}`);
+                
+                if (changes.length > 0) {
+                    this.ui.log(`<span style="color: var(--accent);">→ Bonus: ${changes.join(' | ')}</span>`);
+                }
+            }
+            
+            // Show weapon damage if applicable
+            if (result.item && result.item.stats && result.item.stats.damage) {
+                this.ui.log(`<span style="color: var(--primary);">→ Dégâts: ${result.item.stats.damage}</span>`);
+            }
+        } else {
+            this.ui.log(result.message);
+        }
+        
         this.ui.updateHUD(this.player);
         this.ui.updateInventoryDisplay(this.player, (id) => this.world.getItem(id));
         this.ui.switchTab('inventory');
@@ -348,8 +453,6 @@ export class Game {
         this.ui.updateInventoryDisplay(this.player, (id) => this.world.getItem(id));
         this.ui.switchTab('inventory');
     }
-
-
 
     async handleTalk(targetQuery) {
         if (!targetQuery) {
@@ -383,6 +486,53 @@ export class Game {
 
     handleQuests() {
         this.ui.log(this.questManager.getActiveQuestsSummary());
+    }
+
+    async handleJump(targetX, targetY) {
+        // 1. Validation
+        if (isNaN(targetX) || isNaN(targetY)) {
+            this.ui.logSystem("SYNTAXE INVALIDE, Opérateur. Utiliser : JUMP [X] [Y].");
+            return;
+        }
+
+        // 2. Check accessibility
+        const targetZoneId = this.world.getZoneIdByCoords(targetX, targetY);
+        if (!targetZoneId) {
+            this.ui.log(`[ERREUR DE LIAISON] : Secteur [${targetX}, ${targetY}] inexistant.`);
+            return;
+        }
+
+        const targetZone = this.world.getZone(targetZoneId);
+        if (!targetZone.visited) {
+            this.ui.log(`[ERREUR DE LIAISON] : Secteur [${targetX}, ${targetY}] non cartographié. Accès refusé.`);
+            return;
+        }
+
+        if (targetZoneId === this.world.currentLocationId) {
+             this.ui.log("Agent déjà présent sur ce secteur.");
+             return;
+        }
+
+        // 3. Combat Check (Basic check, Combat class usually handles modal state but we can check if UI is tracking it?)
+        // Assuming strictly turn based, but "isActive" isn't exposed on Combat class public interface easily without checking source.
+        // Actually, resolveAction wouldn't even run if combat was expecting input unless we are in free roam.
+        // But let's assume valid.
+
+        // 4. Execution
+        this.ui.log(`\n**[PROTOCOLE DE SAUT NEURONAL ACTIVÉ]**`);
+        this.ui.log(`Compression et re-routage du flux de données...`);
+        
+        await this.ui.sleep(800);
+        
+        // Teleport
+        this.world.currentLocationId = targetZoneId;
+        
+        this.ui.log(`[SYNCHRONISATION TERMINÉE] : Agent 'Ghost Link' localisé au secteur [${targetX}, ${targetY}].`);
+        
+        this.handleLook();
+        this.ui.updatePrompt(targetZoneId);
+        this.ui.updateMinimap(this.world);
+        this.updateAutocompleteContext();
     }
 
     handleSave() {
@@ -435,18 +585,10 @@ export class Game {
     }
 
     handleQuit() {
-        this.ui.log("Déconnexion en cours...");
-        
-        // Reset game state
+        this.ui.log("\n**[DÉCONNEXION D'URGENCE]** Interruption du signal neural...", { allowHTML: true });
+        this.ui.log("Sauvegarde du tampon mémoire...", { allowHTML: true });
+        this.handleSave();
         setTimeout(() => {
-            // Clear game log
-            if (this.ui.gameLog) this.ui.gameLog.innerHTML = '';
-            
-            // Reset player
-            this.player = new Player();
-            this.world = null;
-            this.combat = null;
-            this.hacking = null;
             
             // Hide game interface
             this.ui.terminalContainer.style.display = 'none';

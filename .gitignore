@@ -1,2 +1,8 @@
 vids/
+node_modules/
+package-lock.json
+playwright-report/
+tests/
+test-results/
+*.log
 

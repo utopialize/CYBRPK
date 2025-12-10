@@ -2,7 +2,7 @@
   {
     "id": "QUEST_01_FIRST_RUN",
     "titre": "Premier Boulot",
-    "description": "Gibson vous propose un travail simple : récupérer un datapad volé dans la ruelle nord.",
+    "description": "Gibson vous propose un travail : traquer un Drone Corrompu qui détient un datapad volé.",
     "donneur": "GIBSON_HACKER",
     "etapes": [
       {
@@ -10,14 +10,14 @@
         "description": "Parler à Gibson",
         "type": "talk",
         "cible": "GIBSON_HACKER",
-        "dialogue": "Écoute, 'Runner. J'ai un boulot pour toi. Un datapad m'a été volé par un drone de sécurité défectueux dans la ruelle au nord. Ramène-le moi et je te paie 200 crédits."
+        "dialogue": "Écoute, 'Runner. J'ai un boulot. Un de mes drones a été corrompu et a filé avec un datapad crucial. Je ne sais pas où il est, il bouge dans le secteur. Traque le 'Drone Corrompu'. HACK-le pour récupérer le datapad intact... Si tu le détruis, les données risquent d'être endommagées."
       },
       {
         "id": "STEP_2",
-        "description": "Récupérer le datapad dans la ruelle",
+        "description": "Récupérer le datapad sur le Drone Corrompu",
         "type": "obtain",
         "cible": "DATAPAD_KEY",
-        "zone_hint": "SEC_02_RUELLE"
+        "zone_hint": "UNKNOWN"
       },
       {
         "id": "STEP_3",
