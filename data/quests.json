@@ -1,0 +1,71 @@
+[
+  {
+    "id": "QUEST_01_FIRST_RUN",
+    "titre": "Premier Boulot",
+    "description": "Gibson vous propose un travail simple : récupérer un datapad volé dans la ruelle nord.",
+    "donneur": "GIBSON_HACKER",
+    "etapes": [
+      {
+        "id": "STEP_1",
+        "description": "Parler à Gibson",
+        "type": "talk",
+        "cible": "GIBSON_HACKER",
+        "dialogue": "Écoute, 'Runner. J'ai un boulot pour toi. Un datapad m'a été volé par un drone de sécurité défectueux dans la ruelle au nord. Ramène-le moi et je te paie 200 crédits."
+      },
+      {
+        "id": "STEP_2",
+        "description": "Récupérer le datapad dans la ruelle",
+        "type": "obtain",
+        "cible": "DATAPAD_KEY",
+        "zone_hint": "SEC_02_RUELLE"
+      },
+      {
+        "id": "STEP_3",
+        "description": "Rapporter le datapad à Gibson",
+        "type": "talk",
+        "cible": "GIBSON_HACKER",
+        "dialogue": "Bien joué, 'Runner. Voilà tes crédits. Tu as du potentiel."
+      }
+    ],
+    "recompenses": {
+      "credits": 200,
+      "items": [],
+      "xp": 0
+    }
+  },
+  {
+    "id": "QUEST_02_CORPO_HUNT",
+    "titre": "Chasse au Corpo",
+    "description": "Gibson a repéré un agent corporatiste qui traîne dans le secteur. Il faut l'éliminer.",
+    "donneur": "GIBSON_HACKER",
+    "prerequis": ["QUEST_01_FIRST_RUN"],
+    "etapes": [
+      {
+        "id": "STEP_1",
+        "description": "Parler à Gibson",
+        "type": "talk",
+        "cible": "GIBSON_HACKER",
+        "dialogue": "J'ai un autre boulot. Un agent corpo fouine dans le coin. Trouve-le et neutralise-le. Discrètement."
+      },
+      {
+        "id": "STEP_2",
+        "description": "Éliminer l'agent corporatiste",
+        "type": "kill",
+        "cible": "AGENT_CORPO",
+        "count": 1
+      },
+      {
+        "id": "STEP_3",
+        "description": "Retourner voir Gibson",
+        "type": "talk",
+        "cible": "GIBSON_HACKER",
+        "dialogue": "Propre. Voilà ta paie. Continue comme ça et tu te feras un nom."
+      }
+    ],
+    "recompenses": {
+      "credits": 500,
+      "items": ["ARME_PISTOLET_9MM"],
+      "xp": 0
+    }
+  }
+]

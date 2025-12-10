@@ -1,0 +1,570 @@
+/* Importez une police style terminal */
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+:root {
+    /* Couleurs du thème */
+    --color-bg-dark: #111;        /* Fond très sombre */
+    --color-text-primary: #00FF41; /* Vert NÉON VIF (primaire) */
+    --color-text-secondary: #008822; /* Vert plus sombre pour les détails */
+    --color-glow: #00FF41;       /* Couleur de la lueur */
+    --color-prompt: #00FFFF;     /* Cyan pour le prompt */
+    --color-danger: #FF0000;
+    --color-warning: #FFFF00;
+}
+
+body {
+    background-color: var(--color-bg-dark);
+    color: var(--color-text-primary);
+    font-family: 'VT323', monospace;
+    font-size: 1.2rem;
+    padding: 20px;
+    margin: 0;
+    line-height: 1.4;
+    overflow-y: hidden; /* Empêche le scroll du body */
+    
+    /* Disable text selection for terminal feel */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* Allow selection only in input field */
+#command-input {
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+}
+
+/* === TITLE SCREEN === */
+#title-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--color-bg-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+#title-content {
+    text-align: center;
+    max-width: 800px;
+}
+
+#title-logo {
+    font-size: 1.5rem;
+    color: var(--color-text-primary);
+    text-shadow: 0 0 10px var(--color-glow);
+    margin-bottom: 40px;
+    animation: glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+    0%, 100% { text-shadow: 0 0 10px var(--color-glow); }
+    50% { text-shadow: 0 0 20px var(--color-glow), 0 0 30px var(--color-glow); }
+}
+
+#title-menu {
+    margin: 40px 0;
+}
+
+.menu-item {
+    font-size: 1.8rem;
+    padding: 10px;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.menu-item:not(.disabled):hover {
+    color: var(--color-prompt);
+    text-shadow: 0 0 10px var(--color-prompt);
+    transform: translateX(10px);
+}
+
+.menu-item.disabled {
+    color: var(--color-text-secondary);
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+#title-footer {
+    margin-top: 60px;
+    color: var(--color-text-secondary);
+    font-size: 1.2rem;
+    animation: blink 1.5s step-start infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+/* === HELP SCREEN === */
+#help-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+#help-content {
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 30px;
+    border: 2px solid var(--color-text-primary);
+    background-color: var(--color-bg-dark);
+}
+
+#help-title {
+    font-size: 2rem;
+    color: var(--color-text-primary);
+    text-align: center;
+    margin-bottom: 30px;
+    text-shadow: 0 0 10px var(--color-glow);
+}
+
+#help-text h3 {
+    color: var(--color-prompt);
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+}
+
+#help-text p {
+    margin: 5px 0;
+    line-height: 1.6;
+}
+
+#help-text .cmd {
+    color: var(--color-warning);
+    font-weight: bold;
+}
+
+#help-footer {
+    margin-top: 30px;
+    text-align: center;
+    color: var(--color-text-secondary);
+    animation: blink 1.5s step-start infinite;
+}
+
+/* === TERMINAL CONTAINER === */
+#terminal-container {
+    width: 95%;
+    max-width: 1200px;
+    height: 95vh;
+    margin: 0 auto;
+    /* Un léger encadrement pour simuler l'écran */
+    border: 3px solid var(--color-text-secondary);
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.5); /* Légère lueur autour */
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+#interface-layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden; /* Empêche le dépassement */
+}
+
+/* Effet Lueur (Glow) sur les éléments importants */
+.glow {
+    text-shadow: 0 0 5px var(--color-glow), 0 0 10px var(--color-glow);
+}
+
+#game-log {
+    flex: 3; /* Prend la majorité de l'espace */
+    overflow-y: auto; /* Permet le défilement du log */
+    margin: 0;
+    padding-bottom: 10px;
+    padding-right: 15px;
+}
+
+/* Log Lines with Luminosity Degradation */
+.log-line {
+    white-space: pre-wrap;
+    transition: opacity 0.3s ease, text-shadow 0.3s ease;
+}
+
+.active-line {
+    opacity: 1;
+    color: var(--color-text-primary);
+    text-shadow: 0 0 8px var(--color-glow), 0 0 12px var(--color-glow);
+}
+
+.dim-1 {
+    opacity: 0.85;
+    text-shadow: 0 0 5px var(--color-glow);
+}
+
+.dim-2 {
+    opacity: 0.7;
+    text-shadow: 0 0 3px var(--color-glow);
+}
+
+.dim-3 {
+    opacity: 0.55;
+    text-shadow: none;
+}
+
+.dim-4 {
+    opacity: 0.4;
+    text-shadow: none;
+}
+
+.dim-5 {
+    opacity: 0.25;
+    text-shadow: none;
+}
+
+#hud-panel {
+    flex: 1;
+    min-width: 250px;
+    border-left: 2px solid var(--color-text-secondary);
+    padding-left: 15px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.hud-box {
+    border: 1px solid var(--color-text-secondary);
+    padding: 10px;
+    margin-bottom: 20px;
+    background: rgba(0, 20, 0, 0.3);
+}
+
+.hud-title {
+    color: var(--color-prompt);
+    text-align: center;
+    border-bottom: 1px solid var(--color-text-secondary);
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+/* --- HUD STATUS --- */
+#hud-status-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+#hud-avatar {
+    width: 64px;
+    height: 64px;
+    border: 2px solid var(--color-text-secondary);
+    image-rendering: pixelated; /* Garde le look 8-bit net */
+}
+
+#hud-bars {
+    flex-grow: 1;
+}
+
+.bar-container {
+    width: 100%;
+    height: 15px;
+    background-color: #002200;
+    border: 1px solid var(--color-text-secondary);
+    margin-top: 2px;
+}
+
+.bar-fill {
+    height: 100%;
+    background-color: var(--color-text-primary);
+    width: 100%; /* Dynamique JS */
+    transition: width 0.3s ease;
+}
+
+#hud-hp-text {
+    font-size: 0.9rem;
+    margin-bottom: 2px;
+}
+
+/* --- HUD STATS --- */
+#hud-stats-content {
+    font-size: 1rem;
+}
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+.stat-name { color: var(--color-text-secondary); }
+.stat-val { color: var(--color-text-primary); font-weight: bold; }
+
+/* --- HUD TABS --- */
+.hud-tabs {
+    display: flex;
+    border-bottom: 2px solid var(--color-text-secondary);
+    margin-bottom: 10px;
+}
+
+.hud-tab {
+    flex: 1;
+    padding: 8px;
+    text-align: center;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    transition: all 0.3s;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+}
+
+.hud-tab:hover {
+    color: var(--color-text-primary);
+    background-color: rgba(0, 255, 65, 0.1);
+}
+
+.hud-tab.active {
+    color: var(--color-prompt);
+    border-bottom-color: var(--color-prompt);
+    text-shadow: 0 0 5px var(--color-prompt);
+}
+
+/* --- HUD VIEWS --- */
+.hud-view {
+    display: none;
+}
+
+.hud-view.active {
+    display: block;
+}
+
+/* --- INVENTORY DISPLAY --- */
+.inv-section {
+    margin-bottom: 15px;
+}
+
+.inv-section-title {
+    color: var(--color-prompt);
+    font-weight: bold;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--color-text-secondary);
+    padding-bottom: 3px;
+}
+
+#equipment-slots {
+    font-size: 0.95rem;
+}
+
+.equipment-slot {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    padding: 3px 0;
+}
+
+.slot-name {
+    color: var(--color-text-secondary);
+}
+
+.slot-item {
+    color: var(--color-text-primary);
+}
+
+.slot-empty {
+    color: var(--color-text-secondary);
+    opacity: 0.5;
+    font-style: italic;
+}
+
+#inventory-items {
+    font-size: 0.9rem;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.inventory-item {
+    padding: 3px 0;
+    border-bottom: 1px dotted var(--color-text-secondary);
+}
+
+.item-name {
+    color: var(--color-text-primary);
+}
+
+.item-count {
+    color: var(--color-warning);
+    margin-left: 5px;
+}
+
+.inventory-empty {
+    color: var(--color-text-secondary);
+    opacity: 0.6;
+    font-style: italic;
+}
+
+/* Simuler une légère distorsion de l'écran (Scanlines) */
+#game-log::before, canvas::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Ajout d'une texture pour simuler des lignes de balayage */
+    background: repeating-linear-gradient(
+        transparent, 
+        transparent 1px, 
+        rgba(0, 0, 0, 0.5) 2px
+    );
+    pointer-events: none; /* Rendre l'overlay invisible aux clics */
+    opacity: 0.1;
+}
+
+/* Stylisation des lignes importantes (pour les titres) */
+#game-log b {
+    color: var(--color-prompt);
+    text-shadow: 0 0 5px var(--color-prompt);
+}
+
+#input-line {
+    display: flex;
+    align-items: center;
+    border-top: 2px solid var(--color-text-secondary); /* Séparateur */
+    padding-top: 10px;
+    padding-bottom: 5px;
+    margin-top: 10px;
+}
+
+#prompt {
+    color: var(--color-prompt);
+    margin-right: 5px;
+    font-weight: bold;
+    text-shadow: 0 0 5px var(--color-prompt);
+}
+
+#input-wrapper {
+    position: relative;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+}
+
+#input-mirror {
+    position: absolute;
+    visibility: hidden;
+    white-space: pre;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+#command-input {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--color-text-primary);
+    font-family: inherit;
+    font-size: inherit;
+    outline: none;
+    caret-color: transparent; /* Hide native cursor */
+}
+
+#custom-cursor {
+    position: absolute;
+    left: 0;
+    color: var(--color-text-primary);
+    animation: cursor-blink 1s step-start infinite;
+    pointer-events: none;
+}
+
+@keyframes cursor-blink {
+    50% { opacity: 0; }
+}
+
+/* Overlay Canvas */
+#canvas-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #000;
+    z-index: 100;
+}
+
+/* === COMBAT VISUAL EFFECTS === */
+
+/* Screen Shake Animation */
+@keyframes shake {
+    0%, 100% { transform: translate(0, 0); }
+    10% { transform: translate(-5px, 2px); }
+    20% { transform: translate(5px, -2px); }
+    30% { transform: translate(-3px, 3px); }
+    40% { transform: translate(3px, -3px); }
+    50% { transform: translate(-2px, 2px); }
+    60% { transform: translate(2px, -2px); }
+    70% { transform: translate(-4px, 1px); }
+    80% { transform: translate(4px, -1px); }
+    90% { transform: translate(-2px, 2px); }
+}
+
+.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+/* Damage Glitch Effect */
+@keyframes glitch {
+    0% {
+        filter: hue-rotate(0deg) brightness(1);
+        transform: translate(0, 0);
+    }
+    20% {
+        filter: hue-rotate(90deg) brightness(1.2);
+        transform: translate(-3px, 2px);
+    }
+    40% {
+        filter: hue-rotate(180deg) brightness(0.8);
+        transform: translate(3px, -2px);
+    }
+    60% {
+        filter: hue-rotate(270deg) brightness(1.1);
+        transform: translate(-2px, 3px);
+    }
+    80% {
+        filter: hue-rotate(360deg) brightness(0.9);
+        transform: translate(2px, -3px);
+    }
+    100% {
+        filter: hue-rotate(0deg) brightness(1);
+        transform: translate(0, 0);
+    }
+}
+
+.damage-effect {
+    animation: glitch 0.6s ease-in-out;
+}
+
+/* Red flash on damage */
+.damage-effect::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 0, 0, 0.3);
+    pointer-events: none;
+    animation: flash 0.6s ease-out;
+    z-index: 999;
+}
+
+@keyframes flash {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}

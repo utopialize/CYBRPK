@@ -1,0 +1,19 @@
+[
+  {
+    "id": "GIBSON_HACKER",
+    "nom": "Gibson, le Puceur",
+    "type": "marchand_quete",
+    "dialogue_initial": "Salut, 'Runner. Tes yeux semblent avoir vu trop de pixels sales. Tu cherches du chrome, ou un boulot ?",
+    "statistiques": {"force": 5, "agilite": 8, "piratage": 10},
+    "inventaire_vente": ["PUCE_OVERCLOCK", "LOGICIEL_FUITE"]
+  },
+  {
+    "id": "DROIDE_GARDIEN",
+    "nom": "Drone de Sécurité E-04",
+    "type": "ennemi",
+    "dialogue_initial": "ALERT. TRESPASS DETECTED.",
+    "statistiques": {"force": 12, "armure": 5, "agilite": 3},
+    "credits_loot": "50-150",
+    "item_loot": ["MODULE_DE_REPARATION"]
+  }
+]

@@ -1,0 +1,76 @@
+[
+  {
+    "id": "JETON_ARCADE",
+    "nom": "Jeton d'Arcade Rouillé",
+    "type": "loot",
+    "description": "Un jeton bon marché. Vaut quelques crédits."
+  },
+  {
+    "id": "CREDITS_20",
+    "nom": "Pile de 20 Crédits",
+    "type": "currency",
+    "description": "Monnaie numérique standard."
+  },
+  {
+    "id": "PUCE_OVERCLOCK",
+    "nom": "Puce d'Overclock (Crâne)",
+    "description": "Une amélioration illégale pour l'interface neuronale. Augmente l'agilité au prix d'une instabilité.",
+    "type": "equipment",
+    "slot": "head",
+    "effet": { "agility": 2 },
+    "prix_achat": 500
+  },
+  {
+    "id": "LOGICIEL_FUITE",
+    "nom": "Logiciel de Fuite V2.1",
+    "description": "Permet de désengager rapidement le combat ou une tentative de piratage. Usage unique.",
+    "type": "consommable",
+    "usage": "fuite_piratage",
+    "prix_achat": 150
+  },
+  {
+    "id": "MODULE_DE_REPARATION",
+    "nom": "Module de Réparation",
+    "type": "loot",
+    "description": "Répare l'équipement."
+  },
+  {
+    "id": "DATAPAD_KEY",
+    "nom": "Clé Datapad",
+    "type": "key",
+    "description": "Clé cryptée."
+  },
+  {
+    "id": "DEBRIS_DRONE",
+    "nom": "Épave de Drone",
+    "description": "Un tas de ferraille fumant et d'étincelles. Inutile maintenant.",
+    "type": "scenery"
+  },
+  {
+    "id": "ARME_PISTOLET_9MM",
+    "nom": "Pistolet 9mm",
+    "description": "Une arme de base, fiable et facile à trouver.",
+    "type": "weapon",
+    "slot": "weapon",
+    "stats": { "damage": 4 },
+    "prix_achat": 300
+  },
+  {
+    "id": "ARME_LAME_VIBRANTE",
+    "nom": "Lame Vibrante",
+    "description": "Un couteau dont la lame vibre à haute fréquence.",
+    "type": "weapon",
+    "slot": "weapon",
+    "stats": { "damage": 6 },
+    "prix_achat": 600
+  },
+  {
+    "id": "ARMURE_GILET_KEVLAR",
+    "nom": "Gilet en Kevlar",
+    "description": "Protection standard contre les balles de petit calibre.",
+    "type": "equipment",
+    "slot": "body",
+    "effet": { "armor": 2 },
+    "prix_achat": 400
+  }
+]

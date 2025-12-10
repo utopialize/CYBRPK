@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <title>Cyber-DND Terminal</title>
+    <link rel="stylesheet" href="styles.css"> 
+</head>
+<body>
+    <!-- Title Screen -->
+    <div id="title-screen" style="display:none;">
+        <div id="title-content">
+            <pre id="title-logo"></pre>
+            <div id="title-menu">
+                <div class="menu-item" id="menu-start">► START</div>
+                <div class="menu-item disabled" id="menu-load">  LOAD (No Save)</div>
+                <div class="menu-item" id="menu-help">  HELP</div>
+            </div>
+            <div id="title-footer">Press ENTER to start</div>
+        </div>
+    </div>
+
+    <!-- Help Screen -->
+    <div id="help-screen" style="display:none;">
+        <div id="help-content">
+            <div id="help-title">═══ CYBRPK - GUIDE ═══</div>
+            <div id="help-text">
+                <h3>COMMANDES PRINCIPALES</h3>
+                <p><span class="cmd">MOVE [DIR]</span> - Se déplacer (NORD/SUD/EST/OUEST)</p>
+                <p><span class="cmd">LOOK</span> - Observer la zone actuelle</p>
+                <p><span class="cmd">TAKE [OBJET]</span> - Ramasser un objet</p>
+                <p><span class="cmd">EQUIP [OBJET]</span> - Équiper un objet</p>
+                <p><span class="cmd">UNEQUIP [SLOT]</span> - Déséquiper (ARME/TETE/CORPS)</p>
+                <p><span class="cmd">ATTACK [CIBLE]</span> - Attaquer un ennemi</p>
+                <p><span class="cmd">TALK [NPC]</span> - Parler à un PNJ</p>
+                <p><span class="cmd">QUESTS</span> - Voir les quêtes actives</p>
+                <p><span class="cmd">SAVE</span> - Sauvegarder la partie</p>
+                <p><span class="cmd">QUIT</span> - Retour au menu</p>
+
+                <h3>RACCOURCIS CLAVIER</h3>
+                <p><span class="cmd">↑/↓</span> - Naviguer dans l'historique</p>
+                <p><span class="cmd">TAB</span> - Autocomplétion</p>
+                <p><span class="cmd">Clic sur INV</span> - Voir l'inventaire (onglet HUD)</p>
+
+                <h3>OBJECTIF</h3>
+                <p>Parlez à Gibson dans la zone de départ pour commencer votre aventure.</p>
+                <p>Explorez le monde, combattez des ennemis, complétez des quêtes.</p>
+
+                <h3>ASTUCES</h3>
+                <p>• Équipez des armes pour augmenter vos dégâts</p>
+                <p>• Équipez des armures pour réduire les dégâts reçus</p>
+                <p>• Sauvegardez régulièrement avec SAVE</p>
+                <p>• Utilisez TAB pour compléter les noms</p>
+            </div>
+            <div id="help-footer">Appuyez sur ECHAP ou cliquez pour fermer</div>
+        </div>
+    </div>
+
+    <div id="terminal-container" style="display:none;">
+        <div id="interface-layout">
+            <pre id="game-log"></pre> 
+            <div id="hud-panel">
+                <div class="hud-box">
+                    <div class="hud-title">NAV_SYSTEM</div>
+                    <canvas id="minimap-canvas" width="200" height="200"></canvas>
+                </div>
+                <div class="hud-box">
+                    <div class="hud-title">STATUS</div>
+                    <div id="hud-status-content">
+                        <img id="hud-avatar" src="img/face_healthy.png" alt="Status">
+                        <div id="hud-bars">
+                            <div id="hud-hp-text">PV: 100/100</div>
+                            <div class="bar-container"><div id="hud-hp-bar" class="bar-fill"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabbed Info Panel -->
+                <div class="hud-box" id="info-panel">
+                    <div class="hud-tabs">
+                        <div class="hud-tab active" id="tab-stats">STATS</div>
+                        <div class="hud-tab" id="tab-inventory">INV</div>
+                    </div>
+                    
+                    <!-- Stats View -->
+                    <div id="view-stats" class="hud-view active">
+                        <div id="hud-stats-content">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- Inventory View -->
+                    <div id="view-inventory" class="hud-view">
+                        <div id="hud-equipment-content">
+                            <div class="inv-section">
+                                <div class="inv-section-title">ÉQUIPEMENT</div>
+                                <div id="equipment-slots">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+                            <div class="inv-section">
+                                <div class="inv-section-title">SAC</div>
+                                <div id="inventory-items">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="input-line">
+            <span id="prompt">[NEO-CITY] ></span>
+            <div id="input-wrapper">
+                <span id="input-mirror"></span>
+                <input type="text" id="command-input" autofocus>
+                <span id="custom-cursor">█</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="canvas-container" style="display:none; text-align: center;">
+        <canvas id="hack-canvas" width="600" height="400" style="border: 2px solid var(--color-prompt);"></canvas>
+        <p style="margin-top: 10px;">**[HACKING ACTIF]** Trouvez le chemin de données !</p>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

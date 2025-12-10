@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBRPK - Hybrid Concept</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Black+Ops+One&family=Syncopate:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #00ffaa;
+            --primary-dim: #00aa77;
+            --accent: #ff0050;
+            --accent-glow: rgba(255, 0, 80, 0.6);
+            --bg-dark: #0a0a0f;
+            --bg-panel: #0d0d14;
+            --bg-terminal: #08080c;
+            --border: #1a1a25;
+            --text: #c0c0d0;
+            --text-dim: #606075;
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: var(--text);
+            font-family: 'Rajdhani', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Noise overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* Scanline effect */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 255, 170, 0.008) 2px,
+                rgba(0, 255, 170, 0.008) 4px
+            );
+            pointer-events: none;
+            z-index: 9998;
+            animation: scanlines 10s linear infinite;
+        }
+
+        @keyframes scanlines {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(100px); }
+        }
+
+        /* Main Layout */
+        .game-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 15px;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            grid-template-rows: auto 1fr;
+            gap: 3px;
+            min-height: 100vh;
+            background: var(--accent);
+        }
+
+        /* Header */
+        .header {
+            grid-column: 1 / -1;
+            background: var(--bg-panel);
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--primary), var(--accent));
+        }
+
+        .logo {
+            font-family: 'Black Ops One', cursive;
+            font-size: 36px;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, var(--primary) 0%, #00ffff 50%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 20px rgba(0, 255, 170, 0.5));
+            position: relative;
+        }
+
+        .logo::after {
+            content: 'CYBRPK';
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: linear-gradient(135deg, var(--accent) 0%, #ff4488 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+            filter: drop-shadow(0 0 10px var(--accent-glow));
+        }
+
+        .location {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .location-text {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: var(--text-dim);
+        }
+
+        .location-text span {
+            color: var(--primary);
+        }
+
+        .credits {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .credits::before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background: var(--accent);
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            animation: spin 4s linear infinite;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Terminal */
+        .terminal {
+            background: var(--bg-terminal);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .terminal-header {
+            padding: 10px 20px;
+            background: rgba(0, 255, 170, 0.05);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .terminal-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.9); }
+        }
+
+        .terminal-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: var(--primary);
+            letter-spacing: 2px;
+        }
+
+        .terminal-coords {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        /* Output area */
+        .output {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 15px;
+            line-height: 1.8;
+        }
+
+        .output-line {
+            margin-bottom: 8px;
+            opacity: 0;
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .zone-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .zone-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+        }
+
+        .zone-title {
+            font-family: 'Black Ops One', cursive;
+            font-size: 22px;
+            color: #fff;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+        }
+
+        .zone-sector {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--accent);
+            background: rgba(255, 0, 80, 0.1);
+            padding: 4px 12px;
+            margin-left: auto;
+        }
+
+        .description {
+            color: var(--text-dim);
+            margin-bottom: 25px;
+            padding-left: 15px;
+            border-left: 2px solid var(--border);
+        }
+
+        .info-block {
+            margin-bottom: 15px;
+        }
+
+        .info-label {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            margin-bottom: 5px;
+        }
+
+        .exits {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .exits span {
+            display: inline-block;
+            padding: 3px 10px;
+            background: rgba(0, 255, 170, 0.1);
+            border: 1px solid rgba(0, 255, 170, 0.3);
+            margin-right: 8px;
+            margin-bottom: 5px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .exits span:hover {
+            background: rgba(0, 255, 170, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 170, 0.3);
+        }
+
+        .entities {
+            color: #ffaa00;
+        }
+
+        .entities span {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 12px;
+            background: rgba(255, 170, 0, 0.1);
+            border-left: 3px solid #ffaa00;
+            margin-right: 10px;
+        }
+
+        .objects {
+            color: #00aaff;
+        }
+
+        .objects span {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 12px;
+            background: rgba(0, 170, 255, 0.1);
+            border-left: 3px solid #00aaff;
+            margin-right: 10px;
+        }
+
+        /* Autocomplete suggestions */
+        .suggestions {
+            padding: 10px 20px;
+            background: rgba(255, 0, 80, 0.05);
+            border-top: 1px solid var(--border);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        .suggestions strong {
+            color: var(--accent);
+        }
+
+        .suggestion-item {
+            display: inline-block;
+            padding: 3px 10px;
+            background: rgba(0, 0, 0, 0.3);
+            margin: 3px;
+            color: var(--primary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .suggestion-item:hover {
+            background: var(--primary);
+            color: var(--bg-dark);
+        }
+
+        /* Input area */
+        .input-area {
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-top: 2px solid var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .prompt {
+            font-family: 'Black Ops One', cursive;
+            font-size: 20px;
+            color: var(--accent);
+            text-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 16px;
+            outline: none;
+            caret-color: transparent;
+        }
+
+        .cursor {
+            width: 10px;
+            height: 20px;
+            background: var(--primary);
+            animation: blink 1s step-end infinite;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* HUD */
+        .hud {
+            background: var(--bg-panel);
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .hud-section {
+            background: var(--bg-terminal);
+            padding: 20px;
+            position: relative;
+        }
+
+        .hud-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--accent), transparent);
+        }
+
+        .section-title {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: var(--accent);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--accent), transparent);
+        }
+
+        /* Portrait */
+        .portrait-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .portrait-frame {
+            position: relative;
+            padding: 8px;
+        }
+
+        /* Animated corner brackets */
+        .portrait-frame::before,
+        .portrait-frame::after,
+        .portrait-corner-bl,
+        .portrait-corner-br {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary);
+        }
+
+        .portrait-frame::before {
+            top: 0;
+            left: 0;
+            border-right: none;
+            border-bottom: none;
+            animation: cornerPulse 2s ease-in-out infinite;
+        }
+
+        .portrait-frame::after {
+            top: 0;
+            right: 0;
+            border-left: none;
+            border-bottom: none;
+            animation: cornerPulse 2s ease-in-out infinite 0.5s;
+        }
+
+        .portrait-corner-bl {
+            bottom: 0;
+            left: 0;
+            border-right: none;
+            border-top: none;
+            animation: cornerPulse 2s ease-in-out infinite 1s;
+        }
+
+        .portrait-corner-br {
+            bottom: 0;
+            right: 0;
+            border-left: none;
+            border-top: none;
+            animation: cornerPulse 2s ease-in-out infinite 1.5s;
+        }
+
+        @keyframes cornerPulse {
+            0%, 100% { 
+                border-color: var(--primary);
+                filter: drop-shadow(0 0 5px var(--primary));
+            }
+            50% { 
+                border-color: var(--accent);
+                filter: drop-shadow(0 0 10px var(--accent));
+            }
+        }
+
+        .portrait {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #1a2a20 0%, #0d1510 100%);
+            border: 3px solid var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .portrait::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: portraitShine 3s ease-in-out infinite;
+        }
+
+        @keyframes portraitShine {
+            0% { left: -100%; }
+            50%, 100% { left: 200%; }
+        }
+
+        .portrait-label {
+            position: absolute;
+            bottom: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: #fff;
+            font-family: 'Syncopate', sans-serif;
+            font-size: 7px;
+            font-weight: 700;
+            padding: 2px 12px;
+            letter-spacing: 2px;
+        }
+
+        /* HP Bar */
+        .hp-container {
+            margin-bottom: 15px;
+        }
+
+        .hp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .hp-label {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+        }
+
+        .hp-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            color: #fff;
+        }
+
+        .hp-value span {
+            color: var(--primary);
+        }
+
+        .hp-bar-outer {
+            height: 12px;
+            background: #111;
+            position: relative;
+            clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+        }
+
+        .hp-bar-inner {
+            height: 100%;
+            width: 75%;
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+            position: relative;
+            transition: width 0.5s ease;
+            clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+        }
+
+        .hp-bar-inner::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.2), transparent);
+        }
+
+        .hp-bar-glow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 75%;
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+            filter: blur(8px);
+            opacity: 0.5;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 3px;
+            background: var(--accent);
+        }
+
+        .stat {
+            background: var(--bg-dark);
+            padding: 12px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary);
+            opacity: 0.3;
+        }
+
+        .stat-value {
+            font-family: 'Black Ops One', cursive;
+            font-size: 28px;
+            color: #fff;
+            line-height: 1;
+            text-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+
+        .stat-label {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--primary);
+            margin-top: 5px;
+        }
+
+        /* Minimap */
+        .minimap-container {
+            position: relative;
+        }
+
+        .minimap {
+            aspect-ratio: 1;
+            background: #0a0a0f;
+            border: 2px solid var(--accent);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .minimap-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(0, 255, 170, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 170, 0.05) 1px, transparent 1px);
+            background-size: 20% 20%;
+        }
+
+        .minimap-vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle, transparent 30%, rgba(0,0,0,0.8) 100%);
+            pointer-events: none;
+        }
+
+        .minimap-node {
+            position: absolute;
+            width: 14%;
+            height: 14%;
+            background: rgba(0, 255, 170, 0.2);
+            border: 2px solid var(--primary-dim);
+            transition: all 0.3s ease;
+        }
+
+        .minimap-node.current {
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-glow);
+            animation: currentPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes currentPulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 20px var(--accent-glow);
+            }
+            50% { 
+                transform: scale(1.1);
+                box-shadow: 0 0 30px var(--accent-glow), 0 0 50px var(--accent-glow);
+            }
+        }
+
+        .minimap-node.visited {
+            background: rgba(0, 255, 170, 0.4);
+            border-color: var(--primary);
+        }
+
+        .minimap-node.fog {
+            background: rgba(50, 50, 70, 0.3);
+            border-color: #333;
+        }
+
+        .minimap-connection {
+            position: absolute;
+            background: var(--primary-dim);
+            opacity: 0.5;
+        }
+
+        .minimap-connection.horizontal {
+            height: 2px;
+            width: 10%;
+        }
+
+        .minimap-connection.vertical {
+            width: 2px;
+            height: 10%;
+        }
+
+        /* Equipment */
+        .equipment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .equipment-slot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 3px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .equipment-slot:hover {
+            background: rgba(0, 255, 170, 0.05);
+            border-left-color: var(--primary);
+        }
+
+        .equipment-slot.equipped {
+            border-left-color: var(--accent);
+        }
+
+        .slot-label {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+        }
+
+        .slot-value {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            color: var(--primary);
+        }
+
+        .slot-empty {
+            color: var(--text-dim);
+            font-style: italic;
+        }
+
+        /* Inventory quick access */
+        .inventory-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+
+        .inv-item {
+            padding: 5px 10px;
+            background: rgba(0, 170, 255, 0.1);
+            border: 1px solid rgba(0, 170, 255, 0.3);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            color: #00aaff;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .inv-item:hover {
+            background: rgba(0, 170, 255, 0.2);
+            box-shadow: 0 0 10px rgba(0, 170, 255, 0.3);
+        }
+
+        /* Quest tracker mini */
+        .quest-tracker {
+            background: rgba(255, 170, 0, 0.05);
+            border-left: 3px solid #ffaa00;
+            padding: 12px;
+        }
+
+        .quest-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            color: #ffaa00;
+            margin-bottom: 5px;
+        }
+
+        .quest-objective {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .quest-objective::before {
+            content: '▸ ';
+            color: #ffaa00;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 900px) {
+            .game-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 1fr auto;
+            }
+
+            .header {
+                flex-wrap: wrap;
+                gap: 10px;
+                justify-content: center;
+                text-align: center;
+            }
+
+            .location {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .hud {
+                order: 2;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 3px;
+            }
+
+            .hud-section:first-child {
+                grid-column: 1 / -1;
+            }
+
+            .terminal {
+                order: 3;
+                min-height: 50vh;
+            }
+
+            .portrait {
+                width: 70px;
+                height: 70px;
+                font-size: 35px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .stat {
+                padding: 8px;
+            }
+
+            .stat-value {
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .hud {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Glitch effect for special events */
+        .glitch {
+            animation: glitch 0.3s ease;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); filter: hue-rotate(0deg); }
+            20% { transform: translate(-5px, 3px); filter: hue-rotate(90deg); }
+            40% { transform: translate(3px, -2px); filter: hue-rotate(180deg); }
+            60% { transform: translate(-2px, 5px); filter: hue-rotate(270deg); }
+            80% { transform: translate(4px, -3px); filter: hue-rotate(360deg); }
+            100% { transform: translate(0); filter: hue-rotate(0deg); }
+        }
+
+        /* Screen shake for combat */
+        .shake {
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">CYBRPK</div>
+            <div class="location">
+                <span class="location-text">SECTEUR <span>01</span> • L'ARCHE D'ARCADE</span>
+            </div>
+            <div class="credits">1,250 CR</div>
+        </header>
+
+        <!-- Terminal -->
+        <main class="terminal">
+            <div class="terminal-header">
+                <div class="terminal-status">
+                    <div class="status-dot"></div>
+                    <span class="terminal-title">TERMINAL ACTIF</span>
+                </div>
+                <span class="terminal-coords">[0,2]</span>
+            </div>
+
+            <div class="output">
+                <div class="output-line" style="animation-delay: 0s;">
+                    <div class="zone-header">
+                        <div class="zone-icon">🎮</div>
+                        <div class="zone-title">L'ARCHE D'ARCADE</div>
+                        <div class="zone-sector">SECTEUR 01</div>
+                    </div>
+                </div>
+
+                <div class="output-line" style="animation-delay: 0.1s;">
+                    <div class="description">
+                        Un repaire sombre aux lumières crues où les joueurs accros et les pirates de bas étage s'échangent des puces de données. L'air est lourd de fumée et de musique synthétique. Le sol est collant.
+                    </div>
+                </div>
+
+                <div class="output-line" style="animation-delay: 0.2s;">
+                    <div class="info-block">
+                        <div class="info-label">SORTIES DISPONIBLES</div>
+                        <div class="exits">
+                            <span>NORD</span>
+                            <span>EST</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="output-line" style="animation-delay: 0.3s;">
+                    <div class="info-block">
+                        <div class="info-label">ENTITÉS DÉTECTÉES</div>
+                        <div class="entities">
+                            <span>👤 Gibson, le Puceur</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="output-line" style="animation-delay: 0.4s;">
+                    <div class="info-block">
+                        <div class="info-label">OBJETS VISIBLES</div>
+                        <div class="objects">
+                            <span>🦺 Gilet en Kevlar</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="suggestions">
+                <strong>Options:</strong>
+                <span class="suggestion-item">TAKE GILET</span>
+                <span class="suggestion-item">TALK GIBSON</span>
+                <span class="suggestion-item">MOVE NORD</span>
+                <span class="suggestion-item">MOVE EST</span>
+            </div>
+
+            <div class="input-area">
+                <span class="prompt">▶</span>
+                <div class="input-wrapper">
+                    <input type="text" class="input" placeholder="" value="talk gib" autofocus>
+                    <div class="cursor"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- HUD -->
+        <aside class="hud">
+            <!-- Status -->
+            <section class="hud-section">
+                <div class="section-title">STATUS</div>
+                
+                <div class="portrait-container">
+                    <div class="portrait-frame">
+                        <div class="portrait-corner-bl"></div>
+                        <div class="portrait-corner-br"></div>
+                        <div class="portrait">
+                            👤
+                            <span class="portrait-label">RUNNER</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hp-container">
+                    <div class="hp-header">
+                        <span class="hp-label">INTÉGRITÉ</span>
+                        <span class="hp-value"><span>75</span>/100</span>
+                    </div>
+                    <div class="hp-bar-outer">
+                        <div class="hp-bar-glow"></div>
+                        <div class="hp-bar-inner"></div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat">
+                        <div class="stat-value">12</div>
+                        <div class="stat-label">FOR</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">14</div>
+                        <div class="stat-label">AGI</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">10</div>
+                        <div class="stat-label">PIR</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">8</div>
+                        <div class="stat-label">ARM</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Navigation -->
+            <section class="hud-section">
+                <div class="section-title">NAVIGATION</div>
+                <div class="minimap-container">
+                    <div class="minimap">
+                        <div class="minimap-grid"></div>
+                        
+                        <!-- Connections -->
+                        <div class="minimap-connection vertical" style="left: 49%; top: 28%;"></div>
+                        <div class="minimap-connection horizontal" style="left: 54%; top: 49%;"></div>
+                        
+                        <!-- Nodes -->
+                        <div class="minimap-node visited" style="left: 43%; top: 15%;"></div>
+                        <div class="minimap-node current" style="left: 43%; top: 43%;"></div>
+                        <div class="minimap-node fog" style="left: 65%; top: 43%;"></div>
+                        <div class="minimap-node fog" style="left: 43%; top: 70%;"></div>
+                        
+                        <div class="minimap-vignette"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Equipment -->
+            <section class="hud-section">
+                <div class="section-title">ÉQUIPEMENT</div>
+                <div class="equipment-list">
+                    <div class="equipment-slot">
+                        <span class="slot-label">ARME</span>
+                        <span class="slot-value slot-empty">— vide —</span>
+                    </div>
+                    <div class="equipment-slot">
+                        <span class="slot-label">TÊTE</span>
+                        <span class="slot-value slot-empty">— vide —</span>
+                    </div>
+                    <div class="equipment-slot equipped">
+                        <span class="slot-label">CORPS</span>
+                        <span class="slot-value">Gilet Kevlar</span>
+                    </div>
+                </div>
+
+                <div class="inventory-items">
+                    <div class="inv-item">Jeton Arcade</div>
+                    <div class="inv-item">Logiciel Fuite</div>
+                    <div class="inv-item">Clé Datapad</div>
+                </div>
+            </section>
+
+            <!-- Quest tracker -->
+            <section class="hud-section">
+                <div class="section-title">MISSION ACTIVE</div>
+                <div class="quest-tracker">
+                    <div class="quest-title">Chasse au Corpo</div>
+                    <div class="quest-objective">Éliminer l'agent corporatiste</div>
+                </div>
+            </section>
+        </aside>
+    </div>
+
+    <script>
+        // Demo: Input typing effect
+        const input = document.querySelector('.input');
+        const cursor = document.querySelector('.cursor');
+        
+        input.addEventListener('input', () => {
+            // Update cursor position would happen here in real implementation
+        });
+
+        // Demo: Clickable suggestions
+        document.querySelectorAll('.suggestion-item').forEach(item => {
+            item.addEventListener('click', () => {
+                input.value = item.textContent.toLowerCase();
+                input.focus();
+            });
+        });
+
+        // Demo: Clickable exits
+        document.querySelectorAll('.exits span').forEach(exit => {
+            exit.addEventListener('click', () => {
+                input.value = 'move ' + exit.textContent.toLowerCase();
+                input.focus();
+            });
+        });
+
+        // Demo: Glitch effect on logo click
+        document.querySelector('.logo').addEventListener('click', () => {
+            document.querySelector('.game-container').classList.add('glitch');
+            setTimeout(() => {
+                document.querySelector('.game-container').classList.remove('glitch');
+            }, 300);
+        });
+
+        // Demo: Shake effect on portrait click (simulating damage)
+        document.querySelector('.portrait').addEventListener('click', () => {
+            document.querySelector('.game-container').classList.add('shake');
+            setTimeout(() => {
+                document.querySelector('.game-container').classList.remove('shake');
+            }, 500);
+        });
+    </script>
+</body>
+</html>

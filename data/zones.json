@@ -1,0 +1,23 @@
+[
+  {
+    "id": "SEC_01_ARCADE",
+    "nom": "L'Arche d'Arcade (Secteur 01)",
+    "description": "Un repaire sombre aux lumières crues où les joueurs accros et les pirates de bas étage s'échangent des puces de données. L'air est lourd de fumée et de musique synthétique. Le sol est collant.",
+    "connexions": {
+      "nord": "SEC_02_RUELLE",
+      "est": "SEC_01_MARCHE"
+    },
+    "pnj_presents": ["GIBSON_HACKER"],
+    "items_statiques": ["JETON_ARCADE", "CREDITS_20"]
+  },
+  {
+    "id": "SEC_02_RUELLE",
+    "nom": "Ruelle Humide",
+    "description": "Une impasse sale, sous la pluie acide. Idéale pour les rencontres discrètes et illégales.",
+    "connexions": {
+      "sud": "SEC_01_ARCADE"
+    },
+    "pnj_presents": ["DROIDE_GARDIEN"],
+    "items_statiques": []
+  }
+]
