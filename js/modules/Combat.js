@@ -138,6 +138,7 @@ export class Combat {
             await this.ui.sleep(300);
 
             // Remove from zone
+            const zone = this.world.getCurrentZone();
             this.world.removeNPCFromZone(zone.id, targetId);
             delete this.world.npcHealth[targetId];
             

@@ -1,9 +1,10 @@
 export class Hacking {
-    constructor(ui, player, world, combat) {
+    constructor(ui, player, world, combat, questManager) {
         this.ui = ui;
         this.player = player;
         this.world = world;
         this.combat = combat;
+        this.questManager = questManager;
         this.active = false;
         this.ctx = ui.getCanvasContext();
         this.canvas = ui.getCanvas();
@@ -75,6 +76,11 @@ export class Hacking {
                  if (!this.player.hasItem('DATAPAD_KEY') && !this.player.hasItem('DATAPAD_BROKEN')) {
                       this.player.addItem('DATAPAD_KEY');
                       this.ui.log(`**CRITIQUE** : Vous extrayez les données avant destruction. 'Clé Datapad' obtenue !`);
+                      
+                      // Check quest progress
+                      if (this.questManager) {
+                          this.questManager.checkQuestProgress('obtain', 'DATAPAD_KEY');
+                      }
                  } else {
                      this.ui.log("Les données ont déjà été extraites.");
                  }
@@ -91,6 +97,10 @@ export class Hacking {
                  this.player.addCredits(credits);
                  this.ui.log(`Données converties en ${credits} crédits.`);
             }
+            
+            // Update UI after rewards
+            this.ui.updateHUD(this.player);
+            this.ui.updateInventoryDisplay(this.player, (id) => this.world.getItem(id));
 
             if (onSuccess) onSuccess();
         } else {

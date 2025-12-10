@@ -18,6 +18,7 @@ export class Player {
         };
         this.credits = 50;
         this.inventory = [];
+        this.godMode = false; // Secret cheat
         
         // Quest tracking
         this.activeQuests = []; // Array of { questId, currentStep }
@@ -25,6 +26,7 @@ export class Player {
     }
     
     takeDamage(amount) {
+        if (this.godMode) return; // Invincible
         this.hp -= amount;
         if (this.hp < 0) this.hp = 0;
     }

@@ -81,7 +81,7 @@ export class Game {
             
             this.questManager = new QuestManager(data.quests, this.player, this.world, this.ui);
             this.combat = new Combat(this.world, this.player, this.ui, this.questManager);
-            this.hacking = new Hacking(this.ui, this.player, this.world, this.combat);
+            this.hacking = new Hacking(this.ui, this.player, this.world, this.combat, this.questManager);
             
             // Audio Init - Bind UI (Player already active)
             if (this.audioPlayer) {
@@ -223,6 +223,9 @@ export class Game {
             case 'DEBUG':
                 this.handleDebug();
                 break;
+            case 'STANDBY':
+                this.handleStandby();
+                break;
             case 'QUIT':
                 this.handleQuit();
                 break;
@@ -231,8 +234,11 @@ export class Game {
                 const y = parseInt(args[1]);
                 this.handleJump(x, y);
                 break;
+            case 'GODMODE':
+                this.handleGodMode();
+                break;
             case 'HELP':
-                this.ui.logSystem("Commandes disponibles, Opérateur: MOVE, LOOK, TAKE, EQUIP, UNEQUIP, ATTACK, HACK, TALK, QUESTS, JUMP, SAVE, QUIT");
+                this.ui.logSystem("Commandes disponibles, Opérateur: MOVE, LOOK, TAKE, EQUIP, UNEQUIP, ATTACK, HACK, TALK, QUESTS, JUMP, SAVE, STANDBY, QUIT");
                 break;
             default:
                 this.ui.logSystem("COMMANDE INCONNUE, Opérateur. Tapez HELP pour la liste des commandes.");
@@ -269,18 +275,13 @@ export class Game {
         `;
         this.ui.log(headerHTML);
         
-        // Update header coordinates
-        if (this.ui.headerCoords) {
-            this.ui.headerCoords.textContent = `[${zone.x},${zone.y}]`;
-        }
-        
         // 2. Description (Typed)
         await this.ui.logTyped(zone.description, 10, 'description');
 
         // 3. Exits
         const exits = Object.keys(zone.connexions);
         if (exits.length > 0) {
-            const exitSpans = exits.map(dir => `<span>${dir}</span>`).join('');
+            const exitSpans = exits.map(dir => `<span class="clickable-cmd" data-cmd="MOVE ${dir.toUpperCase()}">${dir}</span>`).join('');
             const exitsHTML = `
                 <div class="info-block exits">
                     <div class="info-label">SORTIES DISPONIBLES</div>
@@ -297,7 +298,7 @@ export class Game {
             const pnjSpans = zone.pnj_presents.map(id => {
                 const p = this.world.getNPC(id);
                 const name = p ? p.nom : id;
-                return `<span>⚠️ ${name}</span>`;
+                return `<span class="clickable-cmd" data-cmd="TALK ${id}">⚠️ ${name}</span>`;
             }).join(' ');
             
             const pnjHTML = `
@@ -314,7 +315,7 @@ export class Game {
              const itemSpans = zone.items_statiques.map(id => {
                 const i = this.world.getItem(id);
                 const name = i ? i.nom : id;
-                return `<span>📦 ${name}</span>`;
+                return `<span class="clickable-cmd" data-cmd="TAKE ${id}">📦 ${name}</span>`;
             }).join(' ');
 
             const itemsHTML = `
@@ -584,17 +585,37 @@ export class Game {
         this.ui.log("\nMonde jouable: " + (gibson && enemies.length > 0 ? "OUI" : "NON - REGENERER"));
     }
 
-    handleQuit() {
-        this.ui.log("\n**[DÉCONNEXION D'URGENCE]** Interruption du signal neural...", { allowHTML: true });
-        this.ui.log("Sauvegarde du tampon mémoire...", { allowHTML: true });
+    handleStandby() {
+        this.ui.log("\n**[MODE VEILLE]** Mise en pause du système...", { allowHTML: true });
+        this.ui.log("Sauvegarde de l'état actuel...", { allowHTML: true });
         this.handleSave();
         setTimeout(() => {
-            
             // Hide game interface
             this.ui.terminalContainer.style.display = 'none';
-            
             // Show title screen
             this.showTitleScreen();
         }, 1000);
+    }
+
+    handleQuit() {
+        this.ui.log("\n**[DÉCONNEXION D'URGENCE]** Abandon de la session en cours...", { allowHTML: true });
+        this.ui.log("Aucune sauvegarde effectuée.", { allowHTML: true });
+        setTimeout(() => {
+            // Hide game interface
+            this.ui.terminalContainer.style.display = 'none';
+            // Show title screen
+            this.showTitleScreen();
+        }, 1000);
+    }
+
+    handleGodMode() {
+        this.player.godMode = !this.player.godMode;
+        if (this.player.godMode) {
+            this.ui.log("\n**[PROTOCOLE OVERRIDE]** Mode invincibilité activé.", { allowHTML: true });
+            this.ui.log("⚠️ Systèmes de sécurité désactivés. Dégâts entrants neutralisés.", { allowHTML: true });
+        } else {
+            this.ui.log("\n**[PROTOCOLE STANDARD]** Mode invincibilité désactivé.", { allowHTML: true });
+            this.ui.log("Systèmes de sécurité rétablis.", { allowHTML: true });
+        }
     }
 }

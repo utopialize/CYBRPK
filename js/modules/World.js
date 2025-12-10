@@ -219,4 +219,11 @@ export class World {
             zone.items_statiques.push(itemId);
         }
     }
+
+    addNPCToZone(zoneId, npcId) {
+        const zone = this.getZone(zoneId);
+        if (zone && !zone.pnj_presents.includes(npcId)) {
+            zone.pnj_presents.push(npcId);
+        }
+    }
 }

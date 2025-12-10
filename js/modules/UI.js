@@ -19,8 +19,9 @@ export class UI {
         
         // Header elements (New)
         this.headerLocation = document.getElementById('header-location');
-        this.headerCoords = document.getElementById('header-coords');
         this.headerCredits = document.getElementById('header-credits');
+        this.terminalCoords = document.querySelector('.terminal-coords'); // By class
+        
         this.terminalCoords = document.querySelector('.terminal-coords'); // By class
         this.suggestionsBar = document.getElementById('suggestions-bar');
         
@@ -111,6 +112,31 @@ export class UI {
             }
             if (this.currentWorld) this.updateMinimap(this.currentWorld);
         });
+        
+        // Click-to-Command: Event delegation for clickable elements
+        const handleClickableCmd = (e) => {
+            const clickable = e.target.closest('.clickable-cmd');
+            if (clickable && clickable.dataset.cmd) {
+                this.inputField.value = clickable.dataset.cmd;
+                this.inputField.focus();
+                this.updateCursorPosition();
+            }
+        };
+        
+        // Add listener to game log
+        if (this.gameLog) {
+            this.gameLog.addEventListener('click', handleClickableCmd);
+        }
+        
+        // Add listener to equipment slots
+        if (this.equipmentSlots) {
+            this.equipmentSlots.addEventListener('click', handleClickableCmd);
+        }
+        
+        // Add listener to inventory items
+        if (this.inventoryItems) {
+            this.inventoryItems.addEventListener('click', handleClickableCmd);
+        }
     }
 
     handleMinimapMouseDown(e) {
@@ -654,16 +680,16 @@ export class UI {
         const head = player.equipment.head;
         const body = player.equipment.body;
         
-        const renderSlot = (label, item) => `
+        const renderSlot = (label, item, slot) => `
             <div class="equipment-slot">
                 <span class="slot-name">${label}</span>
-                ${item ? `<span class="slot-item">${item.nom}</span>` : `<span class="slot-empty">VIDE</span>`}
+                ${item ? `<span class="slot-item clickable-cmd" data-cmd="UNEQUIP ${slot}">${item.nom}</span>` : `<span class="slot-empty">VIDE</span>`}
             </div>
         `;
 
-        equipHTML += renderSlot("ARME:", weapon);
-        equipHTML += renderSlot("TÊTE:", head);
-        equipHTML += renderSlot("CORPS:", body);
+        equipHTML += renderSlot("ARME:", weapon, "weapon");
+        equipHTML += renderSlot("TÊTE:", head, "head");
+        equipHTML += renderSlot("CORPS:", body, "body");
         
         this.equipmentSlots.innerHTML = equipHTML;
         
@@ -684,7 +710,12 @@ export class UI {
                 const item = itemLookupFn(id);
                 if (item) itemName = item.nom;
 
-                invHTML += `<div class="inventory-item">`;
+                // Check if item is equippable
+                const isEquippable = item && (item.type === 'weapon' || item.type === 'equipment');
+                const clickableClass = isEquippable ? ' clickable-cmd' : '';
+                const cmdAttr = isEquippable ? `data-cmd="EQUIP ${id}"` : '';
+                
+                invHTML += `<div class="inventory-item${clickableClass}" ${cmdAttr}>`;
                 invHTML += `<span class="item-name">${itemName}</span>`;
                 if (count > 1) {
                     invHTML += `<span class="item-count">x${count}</span>`;
