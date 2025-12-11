@@ -91,7 +91,15 @@
 ```
 CRPK/
 ├── index.html              # Point d'entrée
-├── styles.css              # Styles globaux (terminal, HUD, animations)
+├── css/
+│   ├── variables.css       # Variables globales + imports de polices
+│   ├── base.css            # Reset + effets globaux
+│   ├── layout.css          # Grille principale + header
+│   ├── terminal.css        # Terminal, output, input
+│   ├── hud.css             # HUD, portrait, stats, minimap, audio
+│   ├── screens.css         # Écrans titre/aide et overlays
+│   ├── animations.css      # Animations et effets de combat
+│   └── responsive.css      # Media queries
 ├── README.md              # Documentation complète
 ├── js/
 │   ├── main.js            # Initialisation
@@ -117,6 +125,16 @@ CRPK/
     ├── face_hurt.png      # Avatar PV 25-50%
     └── face_critical.png  # Avatar PV < 25%
 ```
+
+---
+
+## 🎨 Guide Styles
+
+- Ordre d'import dans `index.html` : `variables` → `base` → `layout` → `terminal` → `hud` → `screens` → `animations` → `responsive`. Garder cet ordre pour préserver les dépendances (variables, reset, animations et media queries en dernier).
+- Ajouter de nouvelles règles dans le fichier correspondant : layout global dans `layout.css`, terminal (logs, inputs) dans `terminal.css`, HUD (portrait/stats/minimap/audio) dans `hud.css`, écrans ou overlays plein écran dans `screens.css`, media queries uniquement dans `responsive.css`.
+- Toutes les `@keyframes` et effets de combat sont centralisés dans `animations.css`. Réutiliser ces noms d'animations pour éviter les doublons.
+- Variables de couleur/typo dans `variables.css` uniquement. Si une nouvelle variable est nécessaire, l'ajouter là et référencer partout ailleurs.
+- Garder `base.css` minimal (reset + effets globaux). Les styles structurels doivent rester dans `layout.css` ou des fichiers spécifiques pour éviter les fuites globales.
 
 ---
 

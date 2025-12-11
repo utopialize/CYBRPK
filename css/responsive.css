@@ -1,0 +1,27 @@
+/* Mobile Responsive */
+@media (max-width: 900px) {
+    .game-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto 1fr;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .hud {
+        order: 2;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3px;
+    }
+
+    .status-section { grid-column: 1 / -1; }
+    
+    .terminal {
+        order: 3;
+        height: 60vh;
+    }
+}
+
+@media (max-width: 500px) {
+    .hud { grid-template-columns: 1fr; }
+}

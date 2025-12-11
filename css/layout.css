@@ -1,0 +1,97 @@
+/* Main Layout */
+.game-container {
+    max-width: 1400px;
+    height: 100vh;
+    margin: 0 auto;
+    padding: 15px;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 3px;
+    background: var(--accent);
+    position: relative;
+    z-index: 10;
+}
+
+/* Header */
+.header {
+    grid-column: 1 / -1;
+    background: var(--bg-panel);
+    padding: 15px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.header::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--primary), var(--accent));
+}
+
+.logo {
+    font-family: 'Black Ops One', cursive;
+    font-size: 36px;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, var(--primary) 0%, #00ffff 50%, var(--primary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 20px rgba(0, 255, 170, 0.5));
+    position: relative;
+}
+
+.logo::after {
+    content: 'CYBRPK';
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: linear-gradient(135deg, var(--accent) 0%, #ff4488 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+    filter: drop-shadow(0 0 10px var(--accent-glow));
+}
+
+.location {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.location-text {
+    font-family: 'Syncopate', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+}
+
+.location-text span {
+    color: var(--primary);
+}
+
+.credits {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 18px;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.credits::before {
+    content: '';
+    width: 12px;
+    height: 12px;
+    background: var(--accent);
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    animation: spin 4s linear infinite;
+}
