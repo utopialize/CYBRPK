@@ -128,6 +128,16 @@ CRPK/
 
 ---
 
+## 🎨 Guide Styles
+
+- Ordre d'import dans `index.html` : `variables` → `base` → `layout` → `terminal` → `hud` → `screens` → `animations` → `responsive`. Garder cet ordre pour préserver les dépendances (variables, reset, animations et media queries en dernier).
+- Ajouter de nouvelles règles dans le fichier correspondant : layout global dans `layout.css`, terminal (logs, inputs) dans `terminal.css`, HUD (portrait/stats/minimap/audio) dans `hud.css`, écrans ou overlays plein écran dans `screens.css`, media queries uniquement dans `responsive.css`.
+- Toutes les `@keyframes` et effets de combat sont centralisés dans `animations.css`. Réutiliser ces noms d'animations pour éviter les doublons.
+- Variables de couleur/typo dans `variables.css` uniquement. Si une nouvelle variable est nécessaire, l'ajouter là et référencer partout ailleurs.
+- Garder `base.css` minimal (reset + effets globaux). Les styles structurels doivent rester dans `layout.css` ou des fichiers spécifiques pour éviter les fuites globales.
+
+---
+
 ## 🎯 Quêtes Disponibles
 
 ### 1. Premier Boulot
