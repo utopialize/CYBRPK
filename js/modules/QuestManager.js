@@ -52,6 +52,24 @@ export class QuestManager {
         const quest = this.getQuest(questId);
         activeQuest.currentStep++;
 
+        // Check if the new step is an "obtain" type and player already has the item
+        if (activeQuest.currentStep < quest.etapes.length) {
+            const currentStep = quest.etapes[activeQuest.currentStep];
+            if (currentStep.type === 'obtain' && currentStep.cible) {
+                // Check if player already has the required item
+                if (this.player.hasItem(currentStep.cible)) {
+                    this.ui.log(`\n**[OBJECTIF DÉJÀ ACCOMPLI]** ${currentStep.description}`);
+                    // Auto-advance since item is already in inventory
+                    return this.advanceQuest(questId);
+                }
+                // Special check for DATAPAD_BROKEN as alternative
+                if (questId === 'QUEST_01_FIRST_RUN' && currentStep.cible === 'DATAPAD_KEY' && this.player.hasItem('DATAPAD_BROKEN')) {
+                    this.ui.log(`\n**[OBJECTIF DÉJÀ ACCOMPLI]** ${currentStep.description}`);
+                    return this.advanceQuest(questId);
+                }
+            }
+        }
+
         // Check if quest is complete
         if (activeQuest.currentStep >= quest.etapes.length) {
             this.completeQuest(questId);
