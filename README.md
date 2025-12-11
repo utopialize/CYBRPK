@@ -91,7 +91,15 @@
 ```
 CRPK/
 ├── index.html              # Point d'entrée
-├── styles.css              # Styles globaux (terminal, HUD, animations)
+├── css/
+│   ├── variables.css       # Variables globales + imports de polices
+│   ├── base.css            # Reset + effets globaux
+│   ├── layout.css          # Grille principale + header
+│   ├── terminal.css        # Terminal, output, input
+│   ├── hud.css             # HUD, portrait, stats, minimap, audio
+│   ├── screens.css         # Écrans titre/aide et overlays
+│   ├── animations.css      # Animations et effets de combat
+│   └── responsive.css      # Media queries
 ├── README.md              # Documentation complète
 ├── js/
 │   ├── main.js            # Initialisation

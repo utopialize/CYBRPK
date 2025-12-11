@@ -1,0 +1,79 @@
+/* Existing Overlay Screens (Title, Help) - Adapted */
+#title-screen, #help-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--bg-dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+#title-content {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+}
+
+#title-logo {
+    font-size: 10px;
+    color: var(--primary);
+    text-shadow: 0 0 10px var(--primary);
+    white-space: pre;
+    font-family: monospace;
+    line-height: 10px;
+}
+
+#title-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 300px;
+}
+
+.menu-item {
+    font-family: 'Black Ops One', cursive;
+    font-size: 24px;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    padding-left: 20px;
+    position: relative;
+    text-transform: uppercase;
+}
+
+.menu-item:hover, .menu-item.selected {
+    color: var(--accent);
+    text-shadow: 0 0 15px var(--accent);
+    transform: translateX(10px);
+}
+
+.menu-item.selected::before {
+    content: '►';
+    position: absolute;
+    left: -10px;
+    color: var(--accent);
+    animation: blink 0.8s infinite;
+}
+
+#title-footer {
+    position: absolute;
+    bottom: 50px;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--text-dim);
+    font-size: 14px;
+    animation: pulse 2s infinite;
+}
+
+.menu-item.disabled {
+    color: #333;
+    pointer-events: none;
+    text-decoration: line-through;
+}
